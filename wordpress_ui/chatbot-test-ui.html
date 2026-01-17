@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Franchise Chatbot - Intelligent Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: #f7f7f7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chatbot-wrapper {
+            width: 100%;
+            max-width: 380px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            max-height: calc(100vh - 40px);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .pgpt-chat-header {
+            background: #ffffff;
+            color: #333;
+            padding: 16px;
+            border-radius: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .pgpt-header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pgpt-bot-icon-container {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .pgpt-bot-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .pgpt-bot-icon-fallback {
+            font-size: 32px;
+            display: none;
+        }
+
+        .pgpt-chat-header h3 {
+            font-size: 16px;
+            margin: 0;
+            color: #333;
+        }
+
+        .pgpt-status {
+            font-size: 12px;
+            opacity: 0.7;
+            color: #666;
+        }
+
+        .pgpt-close-chatbot-btn {
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 20px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            margin-left: auto;
+        }
+
+        .pgpt-close-chatbot-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
+            color: #333;
+        }
+
+        /* AI Disclaimer Banner */
+        .pgpt-disclaimer-banner {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin: 20px 20px 16px 20px;
+            animation: pgpt-slide-down 0.3s ease;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+        }
+
+        .pgpt-disclaimer-banner.pgpt-hidden {
+            display: none;
+        }
+
+        @keyframes pgpt-slide-down {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pgpt-disclaimer-banner-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .pgpt-disclaimer-icon-container {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .pgpt-disclaimer-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .pgpt-disclaimer-icon-fallback {
+            font-size: 20px;
+            display: none;
+        }
+
+        .pgpt-disclaimer-text {
+            flex: 1;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #92400e;
+        }
+
+        .pgpt-disclaimer-text strong {
+            color: #78350f;
+        }
+
+        .pgpt-close-disclaimer-btn {
+            background: transparent;
+            border: none;
+            color: #92400e;
+            font-size: 18px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .pgpt-close-disclaimer-btn:hover {
+            background: rgba(146, 64, 14, 0.1);
+        }
+
+        /* Messages Area */
+        #pgpt-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f7f7f7;
+            scroll-behavior: smooth;
+        }
+
+        #pgpt-chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #pgpt-chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #pgpt-chat-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .pgpt-message {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 20px;
+            animation: pgpt-message-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pgpt-message:last-child {
+            margin-bottom: 0;
+        }
+
+        @keyframes pgpt-message-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pgpt-assistant-message {
+            flex-direction: row;
+        }
+
+        .pgpt-user-message {
+            flex-direction: row-reverse;
+        }
+
+        .pgpt-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 24px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .pgpt-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .pgpt-avatar-fallback {
+            font-size: 24px;
+            display: none;
+        }
+
+        .pgpt-bubble {
+            background: #ffffff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 75%;
+            line-height: 1.5;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .pgpt-bubble p,
+        .pgpt-bubble div {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .pgpt-bubble div {
+            margin-bottom: 8px;
+        }
+
+        .pgpt-bubble div:last-child {
+            margin-bottom: 0;
+        }
+
+        .pgpt-user-message .pgpt-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Quick Reply Buttons */
+        .pgpt-quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .pgpt-quick-btn {
+            background: #ffffff;
+            border: 1px solid #667eea;
+            color: #667eea;
+            border-radius: 18px;
+            padding: 8px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            font-weight: 500;
+            font-family: inherit;
+        }
+
+        .pgpt-quick-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .pgpt-quick-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Carousel/Cards */
+        .pgpt-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 4px;
+            margin-top: 12px;
+            padding-bottom: 12px;
+            scrollbar-width: thin;
+        }
+
+        .pgpt-carousel::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .pgpt-carousel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .pgpt-carousel::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .pgpt-card {
+            min-width: 240px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .pgpt-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .pgpt-card-stat {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pgpt-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .pgpt-card-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .pgpt-card-btn.btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .pgpt-card-btn.btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .pgpt-card-btn.btn-outline {
+            background: transparent;
+            border: 1px solid #667eea;
+            color: #667eea;
+        }
+
+        .pgpt-card-btn.btn-outline:hover {
+            background: #f0f0f0;
+        }
+
+        /* Typing Indicator */
+        #pgpt-typing-indicator {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px 10px;
+            background: #f9fafb;
+        }
+
+        #pgpt-typing-indicator.pgpt-hidden {
+            display: none;
+        }
+
+        .pgpt-typing-dots {
+            background: #e5e7eb;
+            padding: 10px 14px;
+            border-radius: 12px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .pgpt-typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: pgpt-bounce 1.4s infinite;
+        }
+
+        .pgpt-typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .pgpt-typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pgpt-bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Input Area */
+        .pgpt-chat-input-area {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #ffffff;
+        }
+
+        .pgpt-message-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            color: #1f2937;
+            font-family: inherit;
+        }
+
+        .pgpt-message-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .pgpt-message-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .pgpt-send-button {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            flex-shrink: 0;
+            outline: none;
+        }
+
+        .pgpt-send-button:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .pgpt-send-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .pgpt-send-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .pgpt-send-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* WhatsApp Widget */
+        .pgpt-whatsapp-widget {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #25d366 0%, #20ba5a 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+        }
+
+        .pgpt-whatsapp-widget:hover {
+            background: linear-gradient(135deg, #20ba5a 0%, #1da851 100%);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+        }
+
+        .pgpt-whatsapp-widget:active {
+            transform: scale(0.95);
+        }
+
+        .pgpt-whatsapp-widget svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Calendly Modal */
+        .pgpt-calendly-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000000;
+            animation: pgpt-fade-in 0.3s ease;
+        }
+
+        .pgpt-calendly-overlay.pgpt-hidden {
+            display: none !important;
+        }
+
+        @keyframes pgpt-fade-in {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .pgpt-calendly-modal {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: pgpt-scale-in 0.3s ease;
+        }
+
+        @keyframes pgpt-scale-in {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .pgpt-calendly-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .pgpt-calendly-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .pgpt-close-calendly {
+            background: transparent;
+            border: none;
+            color: #333;
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .pgpt-close-calendly:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+
+        .pgpt-calendly-content {
+            padding: 0;
+            overflow: hidden;
+            flex: 1;
+            min-height: 600px;
+        }
+
+        .pgpt-calendly-inline-widget {
+            width: 100%;
+            height: 600px;
+            min-height: 600px;
+        }
+
+        .pgpt-hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .chatbot-wrapper {
+                width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Chatbot Container -->
+    <div class="chatbot-wrapper">
+        <!-- Header -->
+        <div class="pgpt-chat-header">
+            <div class="pgpt-header-content">
+                <div class="pgpt-bot-icon-container">
+                    <img src="https://staging2.franquiciaboost.com/wp-content/uploads/2023/11/cropped-IconOnly_Transparent-2.png" alt="Franquicia Boost Logo" class="pgpt-bot-icon" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="pgpt-bot-icon-fallback" style="display: none;">🤖</span>
+                </div>
+                <div>
+                    <h3>AI Assistant</h3>
+                    <span class="pgpt-status">● Online</span>
+                </div>
+            </div>
+            <button id="pgpt-close-chatbot" class="pgpt-close-chatbot-btn" aria-label="Close chatbot">✕</button>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div id="pgpt-chat-messages">
+            <!-- AI Disclaimer Banner -->
+            <div id="pgpt-disclaimer-banner" class="pgpt-disclaimer-banner">
+                <div class="pgpt-disclaimer-banner-content">
+                    <div class="pgpt-disclaimer-icon-container">
+                        <img src="https://staging2.franquiciaboost.com/wp-content/uploads/2023/11/cropped-IconOnly_Transparent-2.png" alt="Franquicia Boost" class="pgpt-disclaimer-icon" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span class="pgpt-disclaimer-icon-fallback" style="display: none;">🤖</span>
+                    </div>
+                    <div class="pgpt-disclaimer-text">
+                        <strong>AI Chatbot Notice:</strong> This is an AI-powered assistant. While we strive for accuracy, the AI may occasionally make mistakes. Please verify important information.
+                    </div>
+                    <button id="pgpt-close-disclaimer" class="pgpt-close-disclaimer-btn">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div id="pgpt-typing-indicator" class="pgpt-typing-indicator pgpt-hidden">
+            <div class="pgpt-avatar">
+                <img src="https://staging2.franquiciaboost.com/wp-content/uploads/2023/11/cropped-IconOnly_Transparent-2.png" alt="Franquicia Boost" class="pgpt-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <span class="pgpt-avatar-fallback" style="display: none;">🤖</span>
+            </div>
+            <div class="pgpt-typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="pgpt-chat-input-area">
+            <a id="pgpt-whatsapp-widget" class="pgpt-whatsapp-widget" href="#" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+            </a>
+            <input 
+                type="text" 
+                id="pgpt-message-input" 
+                class="pgpt-message-input" 
+                placeholder="Type your message..."
+                autocomplete="off"
+            />
+            <button id="pgpt-send-button" class="pgpt-send-button" aria-label="Send message">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendly Modal Overlay -->
+    <div id="pgpt-calendly-overlay" class="pgpt-calendly-overlay pgpt-hidden">
+        <div class="pgpt-calendly-modal">
+            <div class="pgpt-calendly-header">
+                <h3>📅 Schedule a Meeting</h3>
+                <button id="pgpt-close-calendly" class="pgpt-close-calendly">✕</button>
+            </div>
+            <div class="pgpt-calendly-content">
+                <div id="pgpt-calendly-inline-widget" class="pgpt-calendly-inline-widget"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+        
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_URL = 'http://localhost:8001/v1/chat/completions';
+        const CONTACT_EMAIL = 'info@franquiciaboost.com';
+        const CALENDLY_URL = 'https://calendly.com/franquiciaboost';
+        const WHATSAPP_NUMBER = '13683999999';
+        const WHATSAPP_MESSAGE = 'Hello! I\'d like to learn more about Franquicia Boost.';
+        const SYSTEM_PROMPT = 'You are an AI assistant for Franquicia Boost that MUST ONLY answer questions using information from the provided context/documents. You MUST NOT use any information from your training data or general knowledge. If the answer is not in the provided context, you MUST respond with: "I don\'t have that information in my knowledge base. For more details, please contact the Franquicia Boost team directly - you can schedule a meeting with us or drop us an email. We\'d be happy to assist you further!" Do NOT make up, guess, or infer information that is not explicitly stated in the context.';
+        const MODEL_NAME = 'gpt-3.5-turbo';
+        const FRANCHISE_NAME = 'Franquicia Boost';
+        
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        const chatContainer = document.getElementById('pgpt-chat-messages');
+        const inputField = document.getElementById('pgpt-message-input');
+        const sendButton = document.getElementById('pgpt-send-button');
+        const typingIndicator = document.getElementById('pgpt-typing-indicator');
+        const calendlyOverlay = document.getElementById('pgpt-calendly-overlay');
+        const closeCalendlyBtn = document.getElementById('pgpt-close-calendly');
+        const whatsappWidget = document.getElementById('pgpt-whatsapp-widget');
+        const disclaimerBanner = document.getElementById('pgpt-disclaimer-banner');
+        const closeDisclaimer = document.getElementById('pgpt-close-disclaimer');
+        const closeChatbotBtn = document.getElementById('pgpt-close-chatbot');
+        
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        let flowState = 'INIT'; // INIT, BANT_EXPERIENCE, BANT_TIMELINE, BANT_CAPITAL, BANT_AUTHORITY, BANT_NEED, QUALIFIED, NURTURE, OPEN_CHAT
+        let leadProfile = {
+            industry: '',
+            budget: '',
+            timeline: '',
+            capital: '',
+            authority: '',
+            leadScore: 0
+        };
+        let conversationHistory = [];
+        let isLoading = false;
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        window.onload = function() {
+            // Initial greeting with Schedule Discovery Call button
+            setTimeout(() => {
+                addBotMessage("Welcome! 👋 I'm here to help you explore franchise opportunities with " + FRANCHISE_NAME + ".", [
+                    { text: "📅 Schedule Discovery Call", action: "BANT_START" },
+                    { text: "💬 Ask Questions", action: "OPEN_CHAT" }
+                ]);
+            }, 500);
+        };
+        
+        // ============================================
+        // CORE MESSAGING FUNCTIONS
+        // ============================================
+        function addBotMessage(text, quickReplies = null, carouselData = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'pgpt-message pgpt-assistant-message';
+            
+            // Avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'pgpt-avatar';
+            avatar.innerHTML = '<img src="https://staging2.franquiciaboost.com/wp-content/uploads/2023/11/cropped-IconOnly_Transparent-2.png" alt="Franquicia Boost" class="pgpt-avatar-img" onerror="this.onerror=null; this.style.display=\'none\'; this.nextElementSibling.style.display=\'block\';"><span class="pgpt-avatar-fallback" style="display: none;">🤖</span>';
+            
+            // Bubble
+            const bubble = document.createElement('div');
+            bubble.className = 'pgpt-bubble';
+            const textP = document.createElement('p');
+            textP.innerHTML = text;
+            bubble.appendChild(textP);
+
+            // Quick Reply Buttons
+            if (quickReplies && quickReplies.length > 0) {
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'pgpt-quick-replies';
+                quickReplies.forEach(qr => {
+                    const btn = document.createElement('button');
+                    btn.className = 'pgpt-quick-btn';
+                    btn.textContent = qr.text;
+                    btn.onclick = () => handleQuickReply(qr.text, qr.action);
+                    btnContainer.appendChild(btn);
+                });
+                bubble.appendChild(btnContainer);
+            }
+
+            // Carousel (Rich Cards)
+            if (carouselData && carouselData.length > 0) {
+                const carousel = document.createElement('div');
+                carousel.className = 'pgpt-carousel';
+                carouselData.forEach(card => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'pgpt-card';
+                    cardDiv.innerHTML = `
+                        <h4>${escapeHtml(card.title)}</h4>
+                        <div class="pgpt-card-stat">💰 ${escapeHtml(card.investment)}</div>
+                        <div class="pgpt-card-stat">📍 ${escapeHtml(card.location)}</div>
+                        ${card.rating ? `<div class="pgpt-card-stat">⭐ ${escapeHtml(card.rating)}</div>` : ''}
+                        <div class="pgpt-card-actions">
+                            <button class="pgpt-card-btn btn-primary" data-action="QUALIFICATION_START" data-value="${escapeHtml(card.title)}">Learn More</button>
+                            <button class="pgpt-card-btn btn-outline" data-action="COMPARE" data-value="${escapeHtml(card.title)}">Compare</button>
+                        </div>
+                    `;
+                    
+                    // Add event listeners to card buttons
+                    const cardBtns = cardDiv.querySelectorAll('.pgpt-card-btn');
+                    cardBtns.forEach(btn => {
+                        btn.onclick = () => {
+                            const action = btn.getAttribute('data-action');
+                            const value = btn.getAttribute('data-value');
+                            handleQuickReply(`I'm interested in ${value}`, action, value);
+                        };
+                    });
+                    
+                    carousel.appendChild(cardDiv);
+                });
+                bubble.appendChild(carousel);
+            }
+
+            msgDiv.appendChild(avatar);
+            msgDiv.appendChild(bubble);
+            chatContainer.appendChild(msgDiv);
+            scrollToBottom();
+            
+            conversationHistory.push({ role: "assistant", content: text });
+        }
+
+        function addUserMessage(text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'pgpt-message pgpt-user-message';
+            msgDiv.innerHTML = `
+                <div class="pgpt-avatar">
+                    <span class="pgpt-avatar-fallback">👤</span>
+                </div>
+                <div class="pgpt-bubble">${escapeHtml(text)}</div>
+            `;
+            chatContainer.appendChild(msgDiv);
+            scrollToBottom();
+            conversationHistory.push({ role: "user", content: text });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================================
+        // FLOW ENGINE (State Machine)
+        // ============================================
+        window.handleQuickReply = function(text, action, value = null) {
+            addUserMessage(text);
+            processFlow(action, value || text);
+        };
+
+        function processFlow(action, value) {
+            showTyping();
+            
+            setTimeout(() => {
+                hideTyping();
+
+                // --- BANT QUALIFICATION FLOW (Stage 2) ---
+                if (action === "BANT_START") {
+                    // Reset leadProfile for new qualification
+                    leadProfile = {
+                        industry: '',
+                        budget: '',
+                        timeline: '',
+                        capital: '',
+                        authority: '',
+                        leadScore: 0
+                    };
+                    flowState = 'BANT_EXPERIENCE';
+                    addBotMessage("Perfect! Before we schedule your call, I'd like to ask a few quick questions to make sure we maximize your time together. 😊<br><br>Have you been exploring franchise opportunities for a while, or is this fairly new?");
+                }
+                
+                // --- Step 1: Experience (No points, just context) ---
+                // Handled in handleInput when flowState === 'BANT_EXPERIENCE'
+                
+                // --- Step 2: Timeline (Score it) ---
+                else if (action === "BANT_TIMELINE_3" || action === "BANT_TIMELINE_6" || action === "BANT_TIMELINE_12" || action === "BANT_TIMELINE_RESEARCH") {
+                    const timelineMap = {
+                        'BANT_TIMELINE_3': 'Within 3 months',
+                        'BANT_TIMELINE_6': '3-6 months',
+                        'BANT_TIMELINE_12': '6-12 months',
+                        'BANT_TIMELINE_RESEARCH': 'Just researching'
+                    };
+                    leadProfile.timeline = timelineMap[action] || value;
+                    
+                    // Score Timeline
+                    if (action === 'BANT_TIMELINE_3') leadProfile.leadScore += 20;
+                    else if (action === 'BANT_TIMELINE_6') leadProfile.leadScore += 15;
+                    else if (action === 'BANT_TIMELINE_12') leadProfile.leadScore += 10;
+                    else leadProfile.leadScore += 5;
+                    
+                    flowState = 'BANT_CAPITAL';
+                    addBotMessage("Great! Do you have access to liquid capital ($150K+) needed?", [
+                        { text: "Yes, ready now", action: "BANT_CAPITAL_YES" },
+                        { text: "Yes, but need to arrange", action: "BANT_CAPITAL_ARRANGE" },
+                        { text: "Not quite there yet", action: "BANT_CAPITAL_NO" }
+                    ]);
+                }
+                
+                // --- Step 3: Budget/Capital (Score it) ---
+                else if (action === "BANT_CAPITAL_YES" || action === "BANT_CAPITAL_ARRANGE" || action === "BANT_CAPITAL_NO") {
+                    const capitalMap = {
+                        'BANT_CAPITAL_YES': 'Yes, ready now',
+                        'BANT_CAPITAL_ARRANGE': 'Yes, but need to arrange',
+                        'BANT_CAPITAL_NO': 'Not quite there yet'
+                    };
+                    leadProfile.capital = capitalMap[action] || value;
+                    
+                    // Score Capital
+                    if (action === 'BANT_CAPITAL_YES') leadProfile.leadScore += 25;
+                    else if (action === 'BANT_CAPITAL_ARRANGE') leadProfile.leadScore += 15;
+                    else leadProfile.leadScore += 5;
+                    
+                    flowState = 'BANT_AUTHORITY';
+                    addBotMessage("Excellent! And are you the primary decision-maker for this investment?", [
+                        { text: "Just me", action: "BANT_AUTHORITY_ME" },
+                        { text: "Me + partner/spouse", action: "BANT_AUTHORITY_PARTNER" },
+                        { text: "Family/Business Partners", action: "BANT_AUTHORITY_FAMILY" }
+                    ]);
+                }
+                
+                // --- Step 4: Authority (Score it) ---
+                else if (action === "BANT_AUTHORITY_ME" || action === "BANT_AUTHORITY_PARTNER" || action === "BANT_AUTHORITY_FAMILY") {
+                    const authorityMap = {
+                        'BANT_AUTHORITY_ME': 'Just me',
+                        'BANT_AUTHORITY_PARTNER': 'Me + partner/spouse',
+                        'BANT_AUTHORITY_FAMILY': 'Family/Business Partners'
+                    };
+                    leadProfile.authority = authorityMap[action] || value;
+                    
+                    // Score Authority
+                    if (action === 'BANT_AUTHORITY_ME') leadProfile.leadScore += 20;
+                    else if (action === 'BANT_AUTHORITY_PARTNER') leadProfile.leadScore += 18;
+                    else leadProfile.leadScore += 15;
+                    
+                    flowState = 'BANT_NEED';
+                    addBotMessage("Wonderful! One last question: What attracted you most to " + FRANCHISE_NAME + "? (Please type your answer)");
+                }
+                
+                // --- Step 5: Need (Text Input, Score it) ---
+                // Handled in handleInput function when flowState === 'BANT_NEED'
+                
+                // --- OPEN CHAT ---
+                else if (action === "OPEN_CHAT") {
+                    flowState = 'OPEN_CHAT';
+                    addBotMessage("Great! Feel free to ask me anything about franchises. I'm here to help! 😊");
+                }
+                
+                // --- MEETING ACTIONS ---
+                else if (action === "OPEN_CALENDLY") {
+                    openCalendlyWidget();
+                }
+                
+                // --- FALLBACK: SEND TO LLM ---
+                else {
+                    if (flowState !== 'BANT_NEED' && flowState !== 'BANT_EXPERIENCE') {
+                        sendMessageToLLM(value || action);
+                    }
+                }
+
+            }, 600);
+        }
+        
+        function checkQualificationAndSchedule() {
+            console.log("Current Lead Score:", leadProfile.leadScore);
+
+            if (leadProfile.leadScore >= 60) {
+                // QUALIFIED (Score >= 60)
+                flowState = 'QUALIFIED';
+                addBotMessage(`Perfect! ✅ Based on your profile (Score: ${leadProfile.leadScore}/100), you're a great fit! Let me connect you with our team.`, [
+                    { text: "📅 Schedule Video Call", action: "OPEN_CALENDLY" }
+                ]);
+            } else {
+                // NURTURE (Score < 60)
+                flowState = 'NURTURE';
+                addBotMessage(`Thanks for your interest! Based on your current profile (Score: ${leadProfile.leadScore}/100), we'd love for you to explore our website to learn more about our franchise opportunities. Feel free to browse through our resources and information at your own pace.`, [
+                    { text: "📅 I'd like to schedule a meeting", action: "OPEN_CALENDLY" }
+                ]);
+            }
+        }
+
+        // ============================================
+        // TEXT INPUT HANDLER
+        // ============================================
+        function handleInput() {
+            const text = inputField.value.trim();
+            if (!text || isLoading) return;
+            
+            inputField.value = '';
+            addUserMessage(text);
+
+            // Handle BANT Step 5: Need (Text Input)
+            if (flowState === 'BANT_NEED') {
+                // Store need/attraction
+                leadProfile.budget = text; // Reusing budget field for need/attraction text
+                // Score Need: +20 points for stating specific attraction
+                leadProfile.leadScore += 20;
+                
+                // Complete qualification and check score
+                flowState = 'CHECKING_SCORE';
+                showTyping();
+                setTimeout(() => {
+                    hideTyping();
+                    checkQualificationAndSchedule();
+                }, 600);
+            }
+            // Handle BANT Step 1: Experience (Text Input - no scoring)
+            else if (flowState === 'BANT_EXPERIENCE') {
+                // Store experience for context (no scoring)
+                leadProfile.industry = text;
+                flowState = 'BANT_TIMELINE';
+                showTyping();
+                setTimeout(() => {
+                    hideTyping();
+                    addBotMessage("Perfect timing! What's your desired timeline for opening?", [
+                        { text: "Within 3 months", action: "BANT_TIMELINE_3" },
+                        { text: "3-6 months", action: "BANT_TIMELINE_6" },
+                        { text: "6-12 months", action: "BANT_TIMELINE_12" },
+                        { text: "Just researching", action: "BANT_TIMELINE_RESEARCH" }
+                    ]);
+                }, 600);
+            }
+            // Detect scheduling intent from natural language
+            else if (flowState === 'OPEN_CHAT' || flowState === 'INIT' || flowState === 'QUALIFIED' || flowState === 'NURTURE') {
+                const lowerText = text.toLowerCase();
+                const schedulingKeywords = [
+                    'schedule', 'scheduling', 'book', 'booking', 'appointment',
+                    'call', 'meeting', 'discovery call', 'discovery meeting',
+                    'talk', 'speak', 'consultation', 'demo', 'demo call'
+                ];
+                
+                const hasSchedulingIntent = schedulingKeywords.some(keyword => lowerText.includes(keyword));
+                
+                if (hasSchedulingIntent) {
+                    // User wants to schedule - start BANT flow
+                    processFlow('BANT_START', null);
+                } else {
+                    // General Chat - send to LLM
+                    sendMessageToLLM(text);
+                }
+            }
+            // Default: send to LLM
+            else {
+                sendMessageToLLM(text);
+            }
+        }
+
+        sendButton.addEventListener('click', handleInput);
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleInput();
+            }
+        });
+
+        // ============================================
+        // API CONNECTION (PrivateGPT)
+        // ============================================
+        async function sendMessageToLLM(text) {
+            if (isLoading) return;
+            
+            isLoading = true;
+            sendButton.disabled = true;
+            showTyping();
+
+            try {
+                const messages = [];
+                
+                if (SYSTEM_PROMPT) {
+                    messages.push({ role: 'system', content: SYSTEM_PROMPT });
+                }
+                
+                const recentHistory = conversationHistory.slice(-10);
+                messages.push(...recentHistory);
+                messages.push({ role: 'user', content: text });
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: messages,
+                        use_context: true,
+                        include_sources: false,
+                        stream: false,
+                        temperature: 0.1,
+                        max_tokens: 1000
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    let botReply = data.choices[0].message.content || '';
+                    
+                    // Normalize the reply - handle null, undefined, or empty strings
+                    botReply = String(botReply || '').trim();
+                    
+                    // Check if response is empty or indicates no information
+                    const isEmpty = !botReply || botReply.length === 0 || botReply === 'Empty Response' || botReply.toLowerCase() === 'empty response';
+                    const lowerMessage = botReply.toLowerCase();
+                    const indicatesNoInfo = isEmpty ||
+                                           lowerMessage.includes("don't have that information") || 
+                                           lowerMessage.includes("not in my knowledge base") ||
+                                           lowerMessage.includes("not in the context") ||
+                                           lowerMessage.includes("i don't know") ||
+                                           lowerMessage.includes("i cannot") ||
+                                           lowerMessage.includes("i'm unable to") ||
+                                           lowerMessage.includes("i don't have") ||
+                                           lowerMessage.includes("no information") ||
+                                           (botReply.length < 10 && botReply.length > 0); // Very short responses might indicate no info
+                    
+                    // Replace empty or "no info" responses with custom message
+                    if (isEmpty || indicatesNoInfo) {
+                        botReply = "I don't have that information in my knowledge base. For more details, please contact the Franquicia Boost team directly - you can schedule a meeting with us or drop us an email at info@franquiciaboost.com. We'd be happy to assist you further!";
+                        // Show message without button
+                        addBotMessage(botReply);
+                    } else {
+                        // Normal response - no button needed
+                        addBotMessage(botReply);
+                    }
+                } else {
+                    // If response format is unexpected, show the custom message
+                    addBotMessage("I don't have that information in my knowledge base. For more details, please contact the Franquicia Boost team directly - you can schedule a meeting with us or drop us an email at info@franquiciaboost.com. We'd be happy to assist you further!", [
+                        { text: "📅 Schedule Meeting", action: "OPEN_CALENDLY" }
+                    ]);
+                }
+
+            } catch (error) {
+                hideTyping();
+                console.error('Error:', error);
+                
+                let errorMessage = 'Sorry, I encountered an error. Please try again later.';
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorMessage = 'Sorry, I\'m having trouble connecting. Please check your internet connection and try again.';
+                } else if (error.message.includes('HTTP error')) {
+                    errorMessage = 'Sorry, there was a server error. Please try again in a moment.';
+                }
+                
+                addBotMessage(errorMessage);
+            } finally {
+                isLoading = false;
+                sendButton.disabled = false;
+                inputField.focus();
+            }
+        }
+
+        // ============================================
+        // UI UTILITIES
+        // ============================================
+        function showTyping() {
+            typingIndicator.classList.remove('pgpt-hidden');
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typingIndicator.classList.add('pgpt-hidden');
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // ============================================
+        // CALENDLY INTEGRATION
+        // ============================================
+        function openCalendlyWidget() {
+            if (calendlyOverlay) {
+                calendlyOverlay.classList.remove('pgpt-hidden');
+                
+                const calendlyDiv = document.getElementById('pgpt-calendly-inline-widget');
+                if (!calendlyDiv) {
+                    console.error('Calendly div not found');
+                    return;
+                }
+                
+                // Load Calendly script if not already loaded
+                if (!window.Calendly) {
+                    const script = document.createElement('script');
+                    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+                    script.async = true;
+                    
+                    script.onload = function() {
+                        initializeCalendlyWidget(calendlyDiv);
+                    };
+                    
+                    script.onerror = function() {
+                        console.error('Failed to load Calendly script');
+                        calendlyDiv.innerHTML = '<div style="padding: 40px; text-align: center;"><p>Unable to load Calendly widget.</p><p>Please <a href="' + CALENDLY_URL + '" target="_blank" style="color: #667eea;">click here to schedule a meeting</a>.</p></div>';
+                    };
+                    
+                    document.body.appendChild(script);
+                } else {
+                    // Script already loaded, initialize immediately
+                    initializeCalendlyWidget(calendlyDiv);
+                }
+            }
+        }
+        
+        function initializeCalendlyWidget(calendlyDiv) {
+            // Clear any previous content
+            calendlyDiv.innerHTML = '';
+            
+            // Check if already initialized
+            if (calendlyDiv.hasAttribute('data-calendly-initialized')) {
+                // Already initialized, just show it
+                return;
+            }
+            
+            try {
+                if (window.Calendly && window.Calendly.initInlineWidget) {
+                    window.Calendly.initInlineWidget({
+                        url: CALENDLY_URL,
+                        parentElement: calendlyDiv
+                    });
+                    calendlyDiv.setAttribute('data-calendly-initialized', 'true');
+                } else {
+                    throw new Error('Calendly API not available');
+                }
+            } catch (error) {
+                console.error('Error initializing Calendly:', error);
+                calendlyDiv.innerHTML = '<div style="padding: 40px; text-align: center;"><p>Unable to initialize Calendly widget.</p><p>Please <a href="' + CALENDLY_URL + '" target="_blank" style="color: #667eea;">click here to schedule a meeting</a>.</p></div>';
+            }
+        }
+
+        function closeCalendlyWidget() {
+            if (calendlyOverlay) {
+                calendlyOverlay.classList.add('pgpt-hidden');
+            }
+        }
+
+        if (closeCalendlyBtn) {
+            closeCalendlyBtn.addEventListener('click', closeCalendlyWidget);
+        }
+
+        if (calendlyOverlay) {
+            calendlyOverlay.addEventListener('click', (e) => {
+                if (e.target === calendlyOverlay) {
+                    closeCalendlyWidget();
+                }
+            });
+        }
+
+        // ============================================
+        // WHATSAPP INTEGRATION
+        // ============================================
+        function handleWhatsAppClick(e) {
+            e.preventDefault();
+            
+            if (!WHATSAPP_NUMBER || WHATSAPP_NUMBER === 'YOUR_WHATSAPP_NUMBER') {
+                alert('Please configure your WhatsApp number in the widget settings.');
+                console.error('WhatsApp number not configured.');
+                return;
+            }
+            
+            const encodedMessage = encodeURIComponent(WHATSAPP_MESSAGE);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        if (whatsappWidget) {
+            whatsappWidget.addEventListener('click', handleWhatsAppClick);
+        }
+
+        // ============================================
+        // DISCLAIMER BANNER
+        // ============================================
+        if (closeDisclaimer) {
+            closeDisclaimer.addEventListener('click', () => {
+                disclaimerBanner.classList.add('pgpt-hidden');
+            });
+        }
+
+        // ============================================
+        // CLOSE CHATBOT HANDLER
+        // ============================================
+        function handleChatbotClose() {
+            const chatbotWrapper = document.querySelector('.chatbot-wrapper');
+            if (chatbotWrapper) {
+                chatbotWrapper.style.display = 'none';
+            }
+        }
+
+        // Event listeners
+        if (closeChatbotBtn) {
+            closeChatbotBtn.addEventListener('click', handleChatbotClose);
+        }
+
+    })();
+    </script>
+</body>
+</html>

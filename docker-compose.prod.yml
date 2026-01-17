@@ -1,0 +1,60 @@
+services:
+  # The Application
+  private-gpt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: private-gpt:prod
+    ports:
+      - "8001:8001"
+    environment:
+      - PORT=8001
+      - PGPT_PROFILES=prod
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy # Waits for DB to be ready
+      qdrant:
+        condition: service_started
+    volumes:
+      # CORRECTED PATH based on the review
+      - ./local_data:/home/worker/app/local_data
+      # Mount settings files so changes are reflected without rebuild
+      - ./settings-prod.yaml:/home/worker/app/settings-prod.yaml:ro
+      - ./settings.yaml:/home/worker/app/settings.yaml:ro
+
+  # The Bookshelf (Postgres)
+  postgres:
+    image: ankane/pgvector:latest
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=privategpt
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Initializes the vector extension automatically
+      - ./init-pgvector.sql:/docker-entrypoint-initdb.d/01-init-pgvector.sql
+    ports:
+      - "5432:5432"
+    # Healthcheck ensures the DB is actually ready before the App starts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d privategpt"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # The Index Cards (Qdrant)
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"  # gRPC port
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+volumes:
+  postgres-data:
+  qdrant-data:
+

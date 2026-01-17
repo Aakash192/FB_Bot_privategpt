@@ -1,0 +1,56 @@
+.venv
+.env
+venv
+
+settings-me.yaml
+
+# Exclude files with hardcoded API keys
+settings.yaml
+
+# Exclude optional settings profile files (keep locally but don't track in git)
+settings-azopenai.yaml
+settings-docker.yaml
+settings-gemini.yaml
+settings-local.yaml
+settings-mock.yaml
+settings-ollama-pg.yaml
+settings-ollama.yaml
+settings-sagemaker.yaml
+settings-vllm.yaml
+
+# Exclude local data and cache
+local_data/
+tiktoken_cache/
+models/
+
+.ruff_cache
+.pytest_cache
+.mypy_cache
+
+# byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# unit tests / coverage reports
+/tests-results.xml
+/.coverage
+/coverage.xml
+/htmlcov/
+
+# pyenv
+/.python-version
+
+# IDE
+.idea/
+.vscode/
+/.run/
+.fleet/
+
+# macOS
+.DS_Store
+
+# Environment variables
+.env.local
+.env.*.local
