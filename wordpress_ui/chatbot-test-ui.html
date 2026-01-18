@@ -768,6 +768,133 @@
             border: none !important;
         }
 
+        /* Pre-chat choice buttons */
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-choice-buttons {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            margin-top: 8px !important;
+        }
+
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-choice-btn {
+            width: 100% !important;
+            padding: 14px !important;
+            border: 2px solid #667eea !important;
+            border-radius: 12px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
+            line-height: normal !important;
+            text-align: center !important;
+            background: white !important;
+            color: #667eea !important;
+            box-sizing: border-box !important;
+        }
+
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-choice-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border-color: transparent !important;
+        }
+
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-choice-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3) !important;
+        }
+
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-choice-btn:active {
+            transform: translateY(0) !important;
+        }
+
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-form-fields {
+            display: none !important;
+        }
+
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-form-fields.active {
+            display: block !important;
+        }
+
+        /* Feedback UI - Scoped to chatbot only */
+        #pgpt-chatbot-container .pgpt-feedback-overlay {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 10000 !important;
+            animation: pgpt-fade-in 0.3s ease !important;
+        }
+
+        #pgpt-chatbot-container .pgpt-feedback-overlay.pgpt-hidden {
+            display: none !important;
+        }
+
+        #pgpt-chatbot-container .pgpt-feedback-box {
+            background: white !important;
+            border-radius: 16px !important;
+            padding: 30px !important;
+            max-width: 320px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+            text-align: center !important;
+            animation: pgpt-scale-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        #pgpt-chatbot-container .pgpt-feedback-box h3 {
+            margin: 0 0 20px 0 !important;
+            font-size: 20px !important;
+            color: #333 !important;
+            font-weight: 600 !important;
+        }
+
+        #pgpt-chatbot-container .pgpt-feedback-buttons {
+            display: flex !important;
+            gap: 20px !important;
+            justify-content: center !important;
+        }
+
+        #pgpt-chatbot-container .pgpt-feedback-btn {
+            background: none !important;
+            border: 2px solid #e0e0e0 !important;
+            border-radius: 50% !important;
+            width: 70px !important;
+            height: 70px !important;
+            font-size: 32px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        #pgpt-chatbot-container .pgpt-feedback-btn:hover {
+            transform: scale(1.1) !important;
+            border-color: #667eea !important;
+        }
+
+        #pgpt-chatbot-container .pgpt-feedback-btn.thumbs-up:hover {
+            background: #e8f5e9 !important;
+        }
+
+        #pgpt-chatbot-container .pgpt-feedback-btn.thumbs-down:hover {
+            background: #ffebee !important;
+        }
+
+        @keyframes pgpt-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pgpt-scale-in {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
         /* Chat Bubble Button */
         #pgpt-chat-bubble {
             position: fixed;
@@ -852,14 +979,14 @@
 </head>
 <body>
     <!-- Chat Bubble Button -->
-    <div id="pgpt-chat-bubble" class="pgpt-hidden">
+    <div id="pgpt-chat-bubble">
         <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
         </svg>
     </div>
 
     <!-- Chatbot Container -->
-    <div id="pgpt-chatbot-container">
+    <div id="pgpt-chatbot-container" class="pgpt-collapsed">
         <div class="chatbot-wrapper">
         <!-- Header -->
         <div class="pgpt-chat-header">
@@ -880,17 +1007,31 @@
         <div id="pgpt-chat-messages">
             <!-- Pre-Chat Sign-In Form -->
             <div id="pgpt-prechat-form" class="pgpt-prechat-form">
-                <h3>👋 Before we start</h3>
-                <input id="pgpt-user-name" placeholder="Full Name" class="pgpt-prechat-input" required />
-                <input id="pgpt-user-email" type="email" placeholder="Email Address" class="pgpt-prechat-input" required />
-                <input id="pgpt-user-phone" type="tel" placeholder="Phone (optional)" class="pgpt-prechat-input" />
+                <h3>👋 Welcome!</h3>
+                
+                <!-- Choice Buttons -->
+                <div id="pgpt-choice-screen" class="pgpt-choice-buttons">
+                    <button id="pgpt-signin-btn" class="pgpt-choice-btn primary">
+                        🔐 Sign In
+                    </button>
+                    <button id="pgpt-guest-btn" class="pgpt-choice-btn">
+                        👤 Continue as Guest
+                    </button>
+                </div>
 
-                <button id="pgpt-start-chat" class="pgpt-prechat-button">
-                    Start Chat
-                </button>
+                <!-- Sign-In Form (hidden initially) -->
+                <div id="pgpt-signin-form" class="pgpt-form-fields">
+                    <input id="pgpt-user-name" placeholder="Full Name" class="pgpt-prechat-input" required />
+                    <input id="pgpt-user-email" type="email" placeholder="Email Address" class="pgpt-prechat-input" required />
+                    <input id="pgpt-user-phone" type="tel" placeholder="Phone Number" class="pgpt-prechat-input" required />
 
-                <div class="pgpt-prechat-consent">
-                    By starting this chat, you agree to data collection for communication purposes.
+                    <button id="pgpt-start-chat" class="pgpt-prechat-button">
+                        Start Chat
+                    </button>
+
+                    <div class="pgpt-prechat-consent">
+                        By starting this chat, you agree to data collection for communication purposes.
+                    </div>
                 </div>
             </div>
 
@@ -941,6 +1082,21 @@
                     <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
                 </svg>
             </button>
+        </div>
+
+        <!-- Feedback Overlay -->
+        <div id="pgpt-feedback-overlay" class="pgpt-feedback-overlay pgpt-hidden">
+            <div class="pgpt-feedback-box">
+                <h3>How was your experience?</h3>
+                <div class="pgpt-feedback-buttons">
+                    <button class="pgpt-feedback-btn thumbs-up" data-feedback="Good" title="Good Experience">
+                        👍
+                    </button>
+                    <button class="pgpt-feedback-btn thumbs-down" data-feedback="Bad" title="Bad Experience">
+                        👎
+                    </button>
+                </div>
+            </div>
         </div>
         </div>
     </div>
@@ -1000,17 +1156,44 @@
             timeline: '',
             capital: '',
             authority: '',
+            attraction: '', // User's response to attraction question
             leadScore: 0
         };
         let conversationHistory = [];
         let isLoading = false;
+        let securityNonce = null;
+        let nonceTimestamp = null;
+        
+        // ============================================
+        // SECURITY FUNCTIONS
+        // ============================================
+        async function getSecurityNonce() {
+            try {
+                const response = await fetch('/wp-json/pgpt/v1/nonce');
+                const data = await response.json();
+                if (data.success) {
+                    securityNonce = data.nonce;
+                    nonceTimestamp = data.timestamp;
+                }
+            } catch (error) {
+                console.error('Failed to get security nonce:', error);
+            }
+        }
         
         // ============================================
         // INITIALIZATION
         // ============================================
         window.onload = function() {
-            // Show pre-chat modal on load
-            // After user signs in, greeting will be shown
+            // Disable chat input until user signs in
+            inputField.disabled = true;
+            sendButton.disabled = true;
+            inputField.placeholder = "Please sign in first to start chatting...";
+            
+            // Get security nonce
+            getSecurityNonce();
+            
+            // Refresh nonce every 4 minutes (before 5-minute expiry)
+            setInterval(getSecurityNonce, 240000);
         };
         
         // ============================================
@@ -1123,13 +1306,109 @@
 
                 // --- BANT QUALIFICATION FLOW (Stage 2) ---
                 if (action === "BANT_START") {
-                    // Reset leadProfile for new qualification
+                    // Check if user is a guest - if so, collect their info first
+                    if (userProfile && userProfile.lead_id.startsWith('guest_')) {
+                        // Show inline form to collect guest info
+                        flowState = 'GUEST_INFO_COLLECTION';
+                        addBotMessage("To schedule a discovery call, I'll need a few details from you. Please provide your information below:");
+                        
+                        // Create inline form for guest
+                        setTimeout(() => {
+                            const guestFormHtml = `
+                                <div class="pgpt-message pgpt-bot-message" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; border-radius: 16px !important; padding: 0 !important; margin: 10px 0 !important; max-width: 85% !important;">
+                                    <div style="background: white !important; border-radius: 16px !important; padding: 20px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;">
+                                        <input id="pgpt-guest-name" placeholder="Full Name" style="width: 100% !important; padding: 12px !important; margin-bottom: 12px !important; border: 2px solid #e0e0e0 !important; border-radius: 8px !important; font-size: 14px !important; font-family: 'Calibri', 'Segoe UI', sans-serif !important; box-sizing: border-box !important; transition: border-color 0.3s ease !important;" required onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'" />
+                                        <input id="pgpt-guest-email" type="email" placeholder="Email Address" style="width: 100% !important; padding: 12px !important; margin-bottom: 12px !important; border: 2px solid #e0e0e0 !important; border-radius: 8px !important; font-size: 14px !important; font-family: 'Calibri', 'Segoe UI', sans-serif !important; box-sizing: border-box !important; transition: border-color 0.3s ease !important;" required onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'" />
+                                        <input id="pgpt-guest-phone" type="tel" placeholder="Phone Number" style="width: 100% !important; padding: 12px !important; margin-bottom: 16px !important; border: 2px solid #e0e0e0 !important; border-radius: 8px !important; font-size: 14px !important; font-family: 'Calibri', 'Segoe UI', sans-serif !important; box-sizing: border-box !important; transition: border-color 0.3s ease !important;" required onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'" />
+                                        <button id="pgpt-guest-submit" style="width: 100% !important; padding: 12px 24px !important; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; border: none !important; border-radius: 8px !important; font-size: 15px !important; font-weight: 600 !important; cursor: pointer !important; transition: transform 0.2s ease, box-shadow 0.2s ease !important; font-family: 'Calibri', 'Segoe UI', sans-serif !important;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                            Submit & Continue
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            chatContainer.insertAdjacentHTML('beforeend', guestFormHtml);
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                            
+                            // Add event listener for guest form submission
+                            document.getElementById('pgpt-guest-submit').addEventListener('click', async () => {
+                                const name = document.getElementById('pgpt-guest-name').value.trim();
+                                const email = document.getElementById('pgpt-guest-email').value.trim();
+                                const phone = document.getElementById('pgpt-guest-phone').value.trim();
+                                
+                                if (!name || !email || !phone) {
+                                    alert('Name, email, and phone are required');
+                                    return;
+                                }
+                                
+                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                if (!emailRegex.test(email)) {
+                                    alert('Please enter a valid email address');
+                                    return;
+                                }
+                                
+                                // Save guest info to Google Sheet
+                                try {
+                                    // Ensure we have a valid nonce
+                                    if (!securityNonce) {
+                                        await getSecurityNonce();
+                                    }
+                                    
+                                    const res = await fetch('/wp-json/pgpt/v1/lead', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ 
+                                            operation: 'CREATE',
+                                            name, 
+                                            email, 
+                                            phone,
+                                            nonce: securityNonce,
+                                            timestamp: nonceTimestamp,
+                                            website: '' // Honeypot field
+                                        })
+                                    });
+                                    
+                                    if (res.ok) {
+                                        const data = await res.json();
+                                        // Update userProfile with new lead_id from server
+                                        userProfile.lead_id = data.lead_id;
+                                        userProfile.name = name;
+                                        userProfile.email = email;
+                                        userProfile.phone = phone;
+                                        
+                                        // Hide the guest form
+                                        const guestFormDiv = document.getElementById('pgpt-guest-submit').closest('.pgpt-bot-message');
+                                        if (guestFormDiv) guestFormDiv.remove();
+                                        
+                                        // Now start BANT flow
+                                        leadProfile = {
+                                            industry: '',
+                                            budget: '',
+                                            timeline: '',
+                                            capital: '',
+                                            authority: '',
+                                            attraction: '',
+                                            leadScore: 0
+                                        };
+                                        flowState = 'BANT_EXPERIENCE';
+                                        addBotMessage("Perfect! Before we schedule your call, I'd like to ask a few quick questions to make sure we maximize your time together. 😊<br><br>Have you been exploring franchise opportunities for a while, or is this fairly new?");
+                                    }
+                                } catch (error) {
+                                    console.error('Error saving guest info:', error);
+                                    alert('Unable to save your information. Please try again.');
+                                }
+                            });
+                        }, 300);
+                        return; // Exit early, wait for guest form submission
+                    }
+                    
+                    // Regular signed-in user - start BANT flow normally
                     leadProfile = {
                         industry: '',
                         budget: '',
                         timeline: '',
                         capital: '',
                         authority: '',
+                        attraction: '',
                         leadScore: 0
                     };
                     flowState = 'BANT_EXPERIENCE';
@@ -1229,6 +1508,20 @@
         
         function checkQualificationAndSchedule() {
             console.log("Current Lead Score:", leadProfile.leadScore);
+            console.log("Attraction Response:", leadProfile.attraction);
+
+            // Calculate priority based on lead score
+            let priority = 'Low';
+            if (leadProfile.leadScore > 75) {
+                priority = 'High';
+            } else if (leadProfile.leadScore >= 60) {
+                priority = 'Medium';
+            }
+
+            // Update Google Sheet if user is signed in (not guest)
+            if (userProfile && userProfile.lead_id && !userProfile.lead_id.startsWith('guest_')) {
+                updateLeadScore(userProfile.lead_id, leadProfile.leadScore, priority, leadProfile.attraction);
+            }
 
             if (leadProfile.leadScore >= 60) {
                 // QUALIFIED (Score >= 60)
@@ -1246,6 +1539,42 @@
         }
 
         // ============================================
+        // UPDATE LEAD SCORE IN GOOGLE SHEETS
+        // ============================================
+        async function updateLeadScore(leadId, score, priority, attraction) {
+            try {
+                // Ensure we have a valid nonce
+                if (!securityNonce) {
+                    await getSecurityNonce();
+                }
+                
+                const response = await fetch('/wp-json/pgpt/v1/lead', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        operation: 'UPDATE',
+                        lead_id: leadId,
+                        lead_score: score,
+                        priority: priority,
+                        attraction: attraction || '',
+                        nonce: securityNonce,
+                        timestamp: nonceTimestamp,
+                        website: ''
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to update lead score');
+                }
+
+                const data = await response.json();
+                console.log('Lead score updated:', data);
+            } catch (error) {
+                console.error('Error updating lead score:', error);
+            }
+        }
+
+        // ============================================
         // TEXT INPUT HANDLER
         // ============================================
         function handleInput() {
@@ -1258,7 +1587,7 @@
             // Handle BANT Step 5: Need (Text Input)
             if (flowState === 'BANT_NEED') {
                 // Store need/attraction
-                leadProfile.budget = text; // Reusing budget field for need/attraction text
+                leadProfile.attraction = text; // Store attraction response
                 // Score Need: +20 points for stating specific attraction
                 leadProfile.leadScore += 20;
                 
@@ -1551,15 +1880,66 @@
         }
 
         // ============================================
-        // PRE-CHAT SIGN-IN HANDLER
+        // PRE-CHAT CHOICE HANDLER (Guest or Sign In)
         // ============================================
-        document.getElementById('pgpt-start-chat').addEventListener('click', async () => {
+        document.getElementById('pgpt-signin-btn').addEventListener('click', () => {
+            // Show the form fields, hide the choice buttons completely
+            const choiceScreen = document.querySelector('.pgpt-choice-buttons');
+            const formFields = document.querySelector('.pgpt-form-fields');
+            
+            if (choiceScreen) {
+                // Must use setProperty with 'important' to override CSS !important rules
+                choiceScreen.style.setProperty('display', 'none', 'important');
+            }
+            if (formFields) {
+                formFields.classList.add('active');
+            }
+        });
+
+        document.getElementById('pgpt-guest-btn').addEventListener('click', () => {
+            // Guest mode: Skip form, enable chat immediately
+            userProfile = {
+                lead_id: 'guest_' + Date.now(),
+                name: 'Guest',
+                email: null,
+                phone: null
+            };
+            chatEnabled = true;
+
+            // Enable chat input
+            inputField.disabled = false;
+            sendButton.disabled = false;
+            inputField.placeholder = "Type your message...";
+            inputField.focus();
+
+            // Hide pre-chat form
+            document.getElementById('pgpt-prechat-form').classList.add('pgpt-hidden');
+
+            // Show welcome message for guest
+            setTimeout(() => {
+                addBotMessage(`Hi Guest! 👋 Welcome to ${FRANCHISE_NAME}. How can I help you today?`, [
+                    { text: "📅 Schedule Discovery Call", action: "BANT_START" },
+                    { text: "💬 Ask Questions", action: "OPEN_CHAT" }
+                ]);
+            }, 500);
+        });
+
+        // ============================================
+        // PRE-CHAT SIGN-IN FORM SUBMISSION
+        // ============================================
+        const startChatBtn = document.getElementById('pgpt-start-chat');
+        let isSubmitting = false;
+        
+        startChatBtn.addEventListener('click', async () => {
+            // Prevent multiple clicks
+            if (isSubmitting) return;
+            
             const name = document.getElementById('pgpt-user-name').value.trim();
             const email = document.getElementById('pgpt-user-email').value.trim();
             const phone = document.getElementById('pgpt-user-phone').value.trim();
 
-            if (!name || !email) {
-                alert('Name and email are required');
+            if (!name || !email || !phone) {
+                alert('Name, email, and phone are required');
                 return;
             }
 
@@ -1570,12 +1950,30 @@
                 return;
             }
 
+            // Disable button and show loading state
+            isSubmitting = true;
+            startChatBtn.disabled = true;
+            startChatBtn.textContent = 'Please wait...';
+            
             try {
-                // Send to WordPress REST API endpoint
+                // Ensure we have a valid nonce
+                if (!securityNonce) {
+                    await getSecurityNonce();
+                }
+                
+                // Send to WordPress REST API endpoint with security parameters
                 const res = await fetch('/wp-json/pgpt/v1/lead', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, phone })
+                    body: JSON.stringify({ 
+                        operation: 'CREATE',
+                        name, 
+                        email, 
+                        phone,
+                        nonce: securityNonce,
+                        timestamp: nonceTimestamp,
+                        website: '' // Honeypot field (should be empty)
+                    })
                 });
 
                 if (!res.ok) {
@@ -1586,6 +1984,12 @@
 
                 userProfile = data;
                 chatEnabled = true;
+
+                // Enable chat input
+                inputField.disabled = false;
+                sendButton.disabled = false;
+                inputField.placeholder = "Type your message...";
+                inputField.focus();
 
                 // Hide pre-chat form
                 document.getElementById('pgpt-prechat-form').classList.add('pgpt-hidden');
@@ -1600,6 +2004,11 @@
 
             } catch (error) {
                 console.error('Error saving user info:', error);
+                // Re-enable button on error
+                isSubmitting = false;
+                startChatBtn.disabled = false;
+                startChatBtn.textContent = 'Start Chat';
+                
                 // For development/testing: proceed anyway but warn user
                 if (confirm('Unable to connect to server. Would you like to continue anyway?')) {
                     userProfile = {
@@ -1609,6 +2018,13 @@
                         phone: phone
                     };
                     chatEnabled = true;
+                    
+                    // Enable chat input
+                    inputField.disabled = false;
+                    sendButton.disabled = false;
+                    inputField.placeholder = "Type your message...";
+                    inputField.focus();
+                    
                     document.getElementById('pgpt-prechat-form').classList.add('pgpt-hidden');
                     setTimeout(() => {
                         addBotMessage(`Hi ${name}! 👋 Welcome to ${FRANCHISE_NAME}. How can I help you today?`, [
@@ -1638,14 +2054,93 @@
         // ============================================
         const chatBubble = document.getElementById('pgpt-chat-bubble');
         const chatbotContainer = document.getElementById('pgpt-chatbot-container');
+        const feedbackOverlay = document.getElementById('pgpt-feedback-overlay');
 
         function handleChatbotClose() {
-            // Collapse to bubble
+            // Show feedback if user is signed in (not guest) and has chatted
+            if (userProfile && !userProfile.lead_id.startsWith('guest_') && conversationHistory.length > 0) {
+                showFeedbackPrompt();
+            } else {
+                // Collapse to bubble immediately
+                collapseToBubble();
+            }
+        }
+
+        function collapseToBubble() {
             if (chatbotContainer) {
                 chatbotContainer.classList.add('pgpt-collapsed');
             }
             if (chatBubble) {
                 chatBubble.classList.remove('pgpt-hidden');
+            }
+        }
+
+        function showFeedbackPrompt() {
+            if (feedbackOverlay) {
+                feedbackOverlay.classList.remove('pgpt-hidden');
+            }
+        }
+
+        function hideFeedbackPrompt() {
+            if (feedbackOverlay) {
+                feedbackOverlay.classList.add('pgpt-hidden');
+            }
+        }
+
+        // ============================================
+        // FEEDBACK HANDLERS
+        // ============================================
+        const feedbackButtons = document.querySelectorAll('.pgpt-feedback-btn');
+        feedbackButtons.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const feedback = btn.dataset.feedback; // "Good" or "Bad"
+                
+                // Save feedback to Google Sheet
+                if (userProfile && userProfile.lead_id) {
+                    await updateFeedback(userProfile.lead_id, feedback);
+                }
+                
+                // Clear chat messages
+                const messages = chatContainer.querySelectorAll('.pgpt-message');
+                messages.forEach(msg => msg.remove());
+                
+                // Reset conversation history
+                conversationHistory = [];
+                
+                // Hide feedback overlay and collapse to bubble
+                hideFeedbackPrompt();
+                collapseToBubble();
+            });
+        });
+
+        async function updateFeedback(leadId, feedback) {
+            try {
+                // Ensure we have a valid nonce
+                if (!securityNonce) {
+                    await getSecurityNonce();
+                }
+                
+                const response = await fetch('/wp-json/pgpt/v1/lead', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        operation: 'UPDATE',
+                        lead_id: leadId,
+                        feedback: feedback,
+                        nonce: securityNonce,
+                        timestamp: nonceTimestamp,
+                        website: '' // Honeypot field
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to update feedback');
+                }
+
+                const data = await response.json();
+                console.log('Feedback updated:', data);
+            } catch (error) {
+                console.error('Error updating feedback:', error);
             }
         }
 
