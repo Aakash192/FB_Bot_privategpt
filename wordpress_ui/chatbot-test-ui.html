@@ -674,6 +674,101 @@
             display: none !important;
         }
 
+        /* Pre-Chat Sign-In Styles */
+        #pgpt-prechat-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+
+        #pgpt-prechat-overlay.pgpt-hidden {
+            display: none !important;
+        }
+
+        .pgpt-prechat-modal {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: pgpt-scale-in 0.3s ease;
+        }
+
+        .pgpt-prechat-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #ffffff;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .pgpt-prechat-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .pgpt-prechat-content {
+            padding: 20px;
+        }
+
+        .pgpt-prechat-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .pgpt-prechat-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .pgpt-prechat-input:last-of-type {
+            margin-bottom: 20px;
+        }
+
+        .pgpt-prechat-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .pgpt-prechat-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .pgpt-prechat-button:active {
+            transform: translateY(0);
+        }
+
+        .pgpt-prechat-consent {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+
         /* Responsive */
         @media (max-width: 480px) {
             .chatbot-wrapper {
@@ -686,6 +781,29 @@
     </style>
 </head>
 <body>
+    <!-- Pre-Chat Sign-In Modal -->
+    <div id="pgpt-prechat-overlay" class="pgpt-calendly-overlay">
+        <div class="pgpt-prechat-modal">
+            <div class="pgpt-prechat-header">
+                <h3>👋 Before we start</h3>
+            </div>
+
+            <div class="pgpt-prechat-content">
+                <input id="pgpt-user-name" placeholder="Full Name" class="pgpt-prechat-input" required />
+                <input id="pgpt-user-email" type="email" placeholder="Email Address" class="pgpt-prechat-input" required />
+                <input id="pgpt-user-phone" type="tel" placeholder="Phone (optional)" class="pgpt-prechat-input" />
+
+                <button id="pgpt-start-chat" class="pgpt-prechat-button">
+                    Start Chat
+                </button>
+
+                <div class="pgpt-prechat-consent">
+                    By starting this chat, you agree to data collection for communication purposes.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Chatbot Container -->
     <div class="chatbot-wrapper">
         <!-- Header -->
@@ -801,6 +919,8 @@
         // ============================================
         // STATE MANAGEMENT
         // ============================================
+        let userProfile = null;  // User sign-in info (name, email, phone, lead_id)
+        let chatEnabled = false; // Block chat until user signs in
         let flowState = 'INIT'; // INIT, BANT_EXPERIENCE, BANT_TIMELINE, BANT_CAPITAL, BANT_AUTHORITY, BANT_NEED, QUALIFIED, NURTURE, OPEN_CHAT
         let leadProfile = {
             industry: '',
@@ -817,13 +937,8 @@
         // INITIALIZATION
         // ============================================
         window.onload = function() {
-            // Initial greeting with Schedule Discovery Call button
-            setTimeout(() => {
-                addBotMessage("Welcome! 👋 I'm here to help you explore franchise opportunities with " + FRANCHISE_NAME + ".", [
-                    { text: "📅 Schedule Discovery Call", action: "BANT_START" },
-                    { text: "💬 Ask Questions", action: "OPEN_CHAT" }
-                ]);
-            }, 500);
+            // Show pre-chat modal on load
+            // After user signs in, greeting will be shown
         };
         
         // ============================================
@@ -1063,7 +1178,7 @@
         // ============================================
         function handleInput() {
             const text = inputField.value.trim();
-            if (!text || isLoading) return;
+            if (!chatEnabled || !text || isLoading) return;
             
             inputField.value = '';
             addUserMessage(text);
@@ -1147,6 +1262,14 @@
                 
                 if (SYSTEM_PROMPT) {
                     messages.push({ role: 'system', content: SYSTEM_PROMPT });
+                }
+                
+                // Attach user info to system context
+                if (userProfile) {
+                    messages.push({
+                        role: 'system',
+                        content: `User Info:\nName: ${userProfile.name}\nEmail: ${userProfile.email}\nLead ID: ${userProfile.lead_id}`
+                    });
                 }
                 
                 const recentHistory = conversationHistory.slice(-10);
@@ -1354,6 +1477,89 @@
                 disclaimerBanner.classList.add('pgpt-hidden');
             });
         }
+
+        // ============================================
+        // PRE-CHAT SIGN-IN HANDLER
+        // ============================================
+        document.getElementById('pgpt-start-chat').addEventListener('click', async () => {
+            const name = document.getElementById('pgpt-user-name').value.trim();
+            const email = document.getElementById('pgpt-user-email').value.trim();
+            const phone = document.getElementById('pgpt-user-phone').value.trim();
+
+            if (!name || !email) {
+                alert('Name and email are required');
+                return;
+            }
+
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            try {
+                // Send to WordPress REST API endpoint
+                const res = await fetch('/wp-json/pgpt/v1/lead', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, phone })
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to save user information');
+                }
+
+                const data = await res.json();
+
+                userProfile = data;
+                chatEnabled = true;
+
+                // Hide pre-chat modal
+                document.getElementById('pgpt-prechat-overlay').classList.add('pgpt-hidden');
+
+                // Show welcome message
+                setTimeout(() => {
+                    addBotMessage(`Hi ${name}! 👋 Welcome to ${FRANCHISE_NAME}. How can I help you today?`, [
+                        { text: "📅 Schedule Discovery Call", action: "BANT_START" },
+                        { text: "💬 Ask Questions", action: "OPEN_CHAT" }
+                    ]);
+                }, 500);
+
+            } catch (error) {
+                console.error('Error saving user info:', error);
+                // For development/testing: proceed anyway but warn user
+                if (confirm('Unable to connect to server. Would you like to continue anyway?')) {
+                    userProfile = {
+                        lead_id: 'local_' + Date.now(),
+                        name: name,
+                        email: email,
+                        phone: phone
+                    };
+                    chatEnabled = true;
+                    document.getElementById('pgpt-prechat-overlay').classList.add('pgpt-hidden');
+                    setTimeout(() => {
+                        addBotMessage(`Hi ${name}! 👋 Welcome to ${FRANCHISE_NAME}. How can I help you today?`, [
+                            { text: "📅 Schedule Discovery Call", action: "BANT_START" },
+                            { text: "💬 Ask Questions", action: "OPEN_CHAT" }
+                        ]);
+                    }, 500);
+                }
+            }
+        });
+
+        // Allow Enter key to submit pre-chat form
+        ['pgpt-user-name', 'pgpt-user-email', 'pgpt-user-phone'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('pgpt-start-chat').click();
+                    }
+                });
+            }
+        });
 
         // ============================================
         // CLOSE CHATBOT HANDLER
