@@ -5,25 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Franchise Chatbot - Intelligent Flow</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
+        /* Scoped chatbot styles - won't affect page layout */
+        #pgpt-chatbot-container {
+            all: initial;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999999;
+            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        #pgpt-chatbot-container * {
             box-sizing: border-box;
         }
 
-        body {
-            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            background: #f7f7f7;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .chatbot-wrapper {
-            width: 100%;
-            max-width: 380px;
+        #pgpt-chatbot-container .chatbot-wrapper {
+            width: 380px;
             background: #ffffff;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
@@ -32,10 +29,11 @@
             height: 600px;
             max-height: calc(100vh - 40px);
             overflow: hidden;
+            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
         }
 
         /* Header */
-        .pgpt-chat-header {
+        #pgpt-chatbot-container .pgpt-chat-header {
             background: #ffffff;
             color: #333;
             padding: 16px;
@@ -46,13 +44,13 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .pgpt-header-content {
+        #pgpt-chatbot-container .pgpt-header-content {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .pgpt-bot-icon-container {
+        #pgpt-chatbot-container .pgpt-bot-icon-container {
             width: 32px;
             height: 32px;
             display: flex;
@@ -674,138 +672,195 @@
             display: none !important;
         }
 
-        /* Pre-Chat Sign-In Styles */
-        #pgpt-prechat-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            backdrop-filter: blur(4px);
+        /* Pre-Chat Sign-In Form (Inline in Chat) - Scoped to chatbot only */
+        #pgpt-chat-messages .pgpt-prechat-form {
+            background: #ffffff !important;
+            border-radius: 12px !important;
+            padding: 20px !important;
+            margin: 20px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+            animation: pgpt-message-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
+            box-sizing: border-box !important;
+            position: relative !important;
+            z-index: 1 !important;
         }
 
-        #pgpt-prechat-overlay.pgpt-hidden {
+        #pgpt-chat-messages .pgpt-prechat-form.pgpt-hidden {
             display: none !important;
         }
 
-        .pgpt-prechat-modal {
-            background: #ffffff;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 420px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: pgpt-scale-in 0.3s ease;
+        #pgpt-chat-messages .pgpt-prechat-form h3 {
+            margin: 0 0 16px 0 !important;
+            font-size: 18px !important;
+            color: #333 !important;
+            text-align: center !important;
+            font-weight: 600 !important;
+            line-height: 1.4 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
         }
 
-        .pgpt-prechat-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #e5e7eb;
-            background: #ffffff;
-            border-radius: 16px 16px 0 0;
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-prechat-input {
+            width: 100% !important;
+            padding: 12px 16px !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 8px !important;
+            font-size: 14px !important;
+            margin-bottom: 12px !important;
+            transition: border-color 0.2s !important;
+            box-sizing: border-box !important;
+            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
+            background: #ffffff !important;
+            color: #333 !important;
+            line-height: normal !important;
+            height: auto !important;
+            min-height: auto !important;
+            max-height: none !important;
+            display: block !important;
         }
 
-        .pgpt-prechat-header h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-prechat-input:focus {
+            outline: none !important;
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
         }
 
-        .pgpt-prechat-content {
-            padding: 20px;
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-prechat-button {
+            width: 100% !important;
+            padding: 14px !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+            margin-top: 8px !important;
+            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
+            line-height: normal !important;
+            text-align: center !important;
+            text-decoration: none !important;
+            display: block !important;
+            box-sizing: border-box !important;
         }
 
-        .pgpt-prechat-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 16px;
-            transition: border-color 0.2s;
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-prechat-button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3) !important;
         }
 
-        .pgpt-prechat-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-prechat-button:active {
+            transform: translateY(0) !important;
         }
 
-        .pgpt-prechat-input:last-of-type {
-            margin-bottom: 20px;
+        #pgpt-chat-messages .pgpt-prechat-form .pgpt-prechat-consent {
+            font-size: 11px !important;
+            color: #666 !important;
+            text-align: center !important;
+            margin-top: 12px !important;
+            line-height: 1.4 !important;
+            padding: 0 !important;
+            font-family: "Calibri", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
+            background: transparent !important;
+            border: none !important;
         }
 
-        .pgpt-prechat-button {
-            width: 100%;
-            padding: 14px;
+        /* Chat Bubble Button */
+        #pgpt-chat-bubble {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999998;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pgpt-bubble-bounce 2s infinite;
         }
 
-        .pgpt-prechat-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        #pgpt-chat-bubble.pgpt-hidden {
+            display: none !important;
         }
 
-        .pgpt-prechat-button:active {
-            transform: translateY(0);
+        #pgpt-chat-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.5);
         }
 
-        .pgpt-prechat-consent {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            margin-top: 12px;
-            line-height: 1.5;
+        #pgpt-chat-bubble svg {
+            width: 30px;
+            height: 30px;
+            color: white;
+        }
+
+        @keyframes pgpt-bubble-bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        #pgpt-chat-bubble:hover {
+            animation: none;
+        }
+
+        /* Hide chatbot container when collapsed */
+        #pgpt-chatbot-container.pgpt-collapsed {
+            display: none !important;
         }
 
         /* Responsive */
         @media (max-width: 480px) {
-            .chatbot-wrapper {
+            #pgpt-chatbot-container {
+                bottom: 0;
+                right: 0;
+                left: 0;
+                top: 0;
+            }
+            
+            #pgpt-chatbot-container .chatbot-wrapper {
                 width: 100%;
                 height: 100%;
                 max-height: 100vh;
                 border-radius: 0;
             }
+
+            #pgpt-chat-bubble {
+                width: 56px;
+                height: 56px;
+                bottom: 16px;
+                right: 16px;
+            }
+
+            #pgpt-chat-bubble svg {
+                width: 28px;
+                height: 28px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Pre-Chat Sign-In Modal -->
-    <div id="pgpt-prechat-overlay" class="pgpt-calendly-overlay">
-        <div class="pgpt-prechat-modal">
-            <div class="pgpt-prechat-header">
-                <h3>👋 Before we start</h3>
-            </div>
-
-            <div class="pgpt-prechat-content">
-                <input id="pgpt-user-name" placeholder="Full Name" class="pgpt-prechat-input" required />
-                <input id="pgpt-user-email" type="email" placeholder="Email Address" class="pgpt-prechat-input" required />
-                <input id="pgpt-user-phone" type="tel" placeholder="Phone (optional)" class="pgpt-prechat-input" />
-
-                <button id="pgpt-start-chat" class="pgpt-prechat-button">
-                    Start Chat
-                </button>
-
-                <div class="pgpt-prechat-consent">
-                    By starting this chat, you agree to data collection for communication purposes.
-                </div>
-            </div>
-        </div>
+    <!-- Chat Bubble Button -->
+    <div id="pgpt-chat-bubble" class="pgpt-hidden">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+        </svg>
     </div>
 
     <!-- Chatbot Container -->
-    <div class="chatbot-wrapper">
+    <div id="pgpt-chatbot-container">
+        <div class="chatbot-wrapper">
         <!-- Header -->
         <div class="pgpt-chat-header">
             <div class="pgpt-header-content">
@@ -823,6 +878,22 @@
 
         <!-- Chat Messages Area -->
         <div id="pgpt-chat-messages">
+            <!-- Pre-Chat Sign-In Form -->
+            <div id="pgpt-prechat-form" class="pgpt-prechat-form">
+                <h3>👋 Before we start</h3>
+                <input id="pgpt-user-name" placeholder="Full Name" class="pgpt-prechat-input" required />
+                <input id="pgpt-user-email" type="email" placeholder="Email Address" class="pgpt-prechat-input" required />
+                <input id="pgpt-user-phone" type="tel" placeholder="Phone (optional)" class="pgpt-prechat-input" />
+
+                <button id="pgpt-start-chat" class="pgpt-prechat-button">
+                    Start Chat
+                </button>
+
+                <div class="pgpt-prechat-consent">
+                    By starting this chat, you agree to data collection for communication purposes.
+                </div>
+            </div>
+
             <!-- AI Disclaimer Banner -->
             <div id="pgpt-disclaimer-banner" class="pgpt-disclaimer-banner">
                 <div class="pgpt-disclaimer-banner-content">
@@ -871,6 +942,7 @@
                 </svg>
             </button>
         </div>
+        </div>
     </div>
 
     <!-- Calendly Modal Overlay -->
@@ -893,7 +965,7 @@
         // ============================================
         // CONFIGURATION
         // ============================================
-        const API_URL = 'http://localhost:8001/v1/chat/completions';
+        const API_URL = 'https://fqbbot.com/v1/chat/completions';
         const CONTACT_EMAIL = 'info@franquiciaboost.com';
         const CALENDLY_URL = 'https://calendly.com/franquiciaboost';
         const WHATSAPP_NUMBER = '13683999999';
@@ -1515,8 +1587,8 @@
                 userProfile = data;
                 chatEnabled = true;
 
-                // Hide pre-chat modal
-                document.getElementById('pgpt-prechat-overlay').classList.add('pgpt-hidden');
+                // Hide pre-chat form
+                document.getElementById('pgpt-prechat-form').classList.add('pgpt-hidden');
 
                 // Show welcome message
                 setTimeout(() => {
@@ -1537,7 +1609,7 @@
                         phone: phone
                     };
                     chatEnabled = true;
-                    document.getElementById('pgpt-prechat-overlay').classList.add('pgpt-hidden');
+                    document.getElementById('pgpt-prechat-form').classList.add('pgpt-hidden');
                     setTimeout(() => {
                         addBotMessage(`Hi ${name}! 👋 Welcome to ${FRANCHISE_NAME}. How can I help you today?`, [
                             { text: "📅 Schedule Discovery Call", action: "BANT_START" },
@@ -1562,18 +1634,38 @@
         });
 
         // ============================================
-        // CLOSE CHATBOT HANDLER
+        // CHAT BUBBLE & TOGGLE HANDLERS
         // ============================================
+        const chatBubble = document.getElementById('pgpt-chat-bubble');
+        const chatbotContainer = document.getElementById('pgpt-chatbot-container');
+
         function handleChatbotClose() {
-            const chatbotWrapper = document.querySelector('.chatbot-wrapper');
-            if (chatbotWrapper) {
-                chatbotWrapper.style.display = 'none';
+            // Collapse to bubble
+            if (chatbotContainer) {
+                chatbotContainer.classList.add('pgpt-collapsed');
+            }
+            if (chatBubble) {
+                chatBubble.classList.remove('pgpt-hidden');
+            }
+        }
+
+        function handleChatbotOpen() {
+            // Expand from bubble
+            if (chatbotContainer) {
+                chatbotContainer.classList.remove('pgpt-collapsed');
+            }
+            if (chatBubble) {
+                chatBubble.classList.add('pgpt-hidden');
             }
         }
 
         // Event listeners
         if (closeChatbotBtn) {
             closeChatbotBtn.addEventListener('click', handleChatbotClose);
+        }
+
+        if (chatBubble) {
+            chatBubble.addEventListener('click', handleChatbotOpen);
         }
 
     })();

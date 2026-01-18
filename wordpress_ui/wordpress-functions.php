@@ -69,7 +69,7 @@ function pgpt_store_lead(WP_REST_Request $request) {
     ];
     
     // Send to Google Sheets via Apps Script Web App
-    $google_script_url = 'https://script.google.com/macros/s/AKfycby66ePqrWFA5lsE_iDRje49VuhxK1VBwag3w4AsMOFFx2TCJj6HhdczsuOcqYVMIRAV/exec';
+    $google_script_url = 'https://script.google.com/macros/s/AKfycbzHCKceCGkL6wyYUlFUzAN3VjPaFTTR49kzjQS9UDtfZp4WkzNz-teWXSEmlkojlAW8/exec';
     
     $response = wp_remote_post($google_script_url, [
         'headers' => ['Content-Type' => 'application/json'],

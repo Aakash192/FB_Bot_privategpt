@@ -15,15 +15,41 @@
  * Lead ID | Name | Email | Phone | Timestamp
  */
 
+// Handle OPTIONS request for CORS preflight
+function doOptions(e) {
+  var output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.TEXT);
+  output.setContent('');
+  output.setHeader('Access-Control-Allow-Origin', '*');
+  output.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  output.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  output.setHeader('Access-Control-Max-Age', '86400');
+  return output;
+}
+
+// Handle GET requests (optional - for testing)
+function doGet(e) {
+  var output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.JSON);
+  output.setContent(JSON.stringify({ 
+    status: 'ok',
+    message: 'Google Apps Script is running. Use POST to submit data.',
+    timestamp: new Date().toISOString()
+  }));
+  output.setHeader('Access-Control-Allow-Origin', '*');
+  return output;
+}
+
+// Handle POST request to save lead data
 function doPost(e) {
   try {
     // Open your Google Sheet
-    const sheet = SpreadsheetApp
+    var sheet = SpreadsheetApp
       .openById('1tteWp6PANsUIuzvNsrDKhovG5HYfWWoBejF6MXqhnlg')
       .getSheetByName('Sheet1');  // Change 'Sheet1' if your sheet has a different name
     
     // Parse incoming data
-    const data = JSON.parse(e.postData.contents);
+    var data = JSON.parse(e.postData.contents);
     
     // Append new row with lead data
     sheet.appendRow([
@@ -34,23 +60,29 @@ function doPost(e) {
       data.time
     ]);
     
-    // Return success response
-    return ContentService
-      .createTextOutput(JSON.stringify({ 
-        status: 'ok', 
-        lead_id: data.lead_id,
-        message: 'Lead saved successfully'
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+    // Return success response with CORS headers
+    var output = ContentService.createTextOutput();
+    output.setMimeType(ContentService.MimeType.JSON);
+    output.setContent(JSON.stringify({ 
+      status: 'ok', 
+      lead_id: data.lead_id,
+      message: 'Lead saved successfully'
+    }));
+    output.setHeader('Access-Control-Allow-Origin', '*');
+    output.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    output.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return output;
       
   } catch (error) {
-    // Return error response
-    return ContentService
-      .createTextOutput(JSON.stringify({ 
-        status: 'error', 
-        message: error.toString() 
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+    // Return error response with CORS headers
+    var output = ContentService.createTextOutput();
+    output.setMimeType(ContentService.MimeType.JSON);
+    output.setContent(JSON.stringify({ 
+      status: 'error', 
+      message: error.toString() 
+    }));
+    output.setHeader('Access-Control-Allow-Origin', '*');
+    return output;
   }
 }
 
